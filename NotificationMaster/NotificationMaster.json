@@ -1,6 +1,6 @@
 ﻿{
   "Name": "NotificationMaster",
-  "Author": "NightmareXIV",
+  "Author": "NightmareXIV, Donk",
   "Description": "Notifies you about various events while your game is minimized.",
   "Punchline": "Currently supports notifications: chat messages, approaching map flag, duty found, ending of cutscenes, gp restoration, error during logging in, mob has been pulled.",
   "RepoUrl": "https://github.com/NightmareXIV/NotificationMaster",

@@ -2,10 +2,6 @@
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NotificationMaster
 {
@@ -13,6 +9,7 @@ namespace NotificationMaster
     {
         NotificationMaster p;
         TickScheduler extraNotify = null;
+
         public void Dispose()
         {
             Svc.ClientState.CfPop -= Pop;
@@ -32,42 +29,41 @@ namespace NotificationMaster
         private void Pop(object sender, ContentFinderCondition e)
         {
             PluginLog.Debug("Cf pop " + e.Name.ToString());
-            if (p.PauseUntil > Environment.TickCount64) return;
-            if (!p.ThreadUpdActivated.IsApplicationActivated)
-            {
-                DoNotify(e.Name.ToString());
-            }
+            if (p.PauseUntil > Environment.TickCount64) 
+                return;
+
+            DoNotify(e.Name.ToString());
+
             if (p.cfg.cfPop_NotifyIn30)
             {
                 if (extraNotify != null)
-                {
                     extraNotify.Dispose();
-                }
+
                 extraNotify = new TickScheduler(delegate
                 {
-                    if (!p.ThreadUpdActivated.IsApplicationActivated && Svc.Condition[ConditionFlag.WaitingForDutyFinder]
-                     && !Svc.Condition[ConditionFlag.WaitingForDuty])
-                    {
+                    //!p.ThreadUpdActivated.IsApplicationActivated && 
+                    if (Svc.Condition[ConditionFlag.WaitingForDutyFinder] && !Svc.Condition[ConditionFlag.WaitingForDuty])
                         DoNotify(e.Name.ToString(), true);
-                    }
+
                 }, Svc.Framework, 30 * 1000);
             }
         }
 
         void DoNotify(string str, bool soonEnd = false)
         {
-            if (str == "") str = "Duty roulette";
+            if (str == "")
+                str = "Duty roulette";
+
             if (p.cfg.cfPop_FlashTrayIcon)
-            {
                 Native.Impl.FlashWindow();
-            }
-            if (p.cfg.cfPop_AutoActivateWindow) Native.Impl.Activate();
+
+            if (p.cfg.cfPop_AutoActivateWindow)
+                Native.Impl.Activate();
+
             if (p.cfg.cfPop_ShowToastNotification)
-            {
                 TrayIconManager.ShowToast(str, soonEnd?"Duty invitation expires in 15 seconds!":"Duty pop");
-            }
+            
             if (p.cfg.cfPop_HttpRequestsEnable)
-            {
                 p.httpMaster.DoRequests(p.cfg.cfPop_HttpRequests,
                     new string[][]
                     {
@@ -75,11 +71,9 @@ namespace NotificationMaster
                         new string[] {"$T", soonEnd ? "15":"45"}
                     }
                 );
-            }
+
             if (p.cfg.cfPop_SoundSettings.PlaySound)
-            {
                 p.audioPlayer.Play(p.cfg.cfPop_SoundSettings);
-            }
         }
 
         internal static void Setup(bool enable, NotificationMaster p)
@@ -92,9 +86,7 @@ namespace NotificationMaster
                     PluginLog.Information("Enabling cfPop module");
                 }
                 else
-                {
                     PluginLog.Information("cfPop module already enabled");
-                }
             }
             else
             {
@@ -105,9 +97,7 @@ namespace NotificationMaster
                     PluginLog.Information("Disabling cfPop module");
                 }
                 else
-                {
                     PluginLog.Information("cfPop module already disabled");
-                }
             }
         }
     }
